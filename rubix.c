@@ -11,23 +11,27 @@
 #define ORANGE 3
 #define GREEN 4
 #define YELLOW 5
+#define N 12
 
 
 
 void printCube(char **cube);
 void checkCube(char **cube);
 void rotate_cube(char **cube,int move,bool clockwise);
+void solveCube(char **cube);
 
 int main(){
 	FILE *fp;
 	char **cube,i=0,j;
 
-								//malloc, initialize space
 	cube  = (char**)malloc(NFaces*sizeof(char*));	
 	for(i=0;i<NSquares;i++)
 	cube[i] = (char*)malloc(NSquares*sizeof(char));
 
   	fp = fopen("input/3x3.txt","r");
+	// fp = fopen("input/3x3.txt","r");
+	fp = fopen("input/3x3-reverse.txt","r");
+	// fp = fopen("input/3x3-reverse.txt","r");
 	// fp = fopen("input/4x4.txt","r");
 	// fp = fopen("input/5x5.txt","r");
 
@@ -39,7 +43,6 @@ int main(){
 		}
 		i++;
 	}
-
 	printCube(cube);
 	printf("MOVE: rotate_cube(cube,ORANGE,!Clockwise)\n");
 	rotate_cube(cube,   ORANGE,   !Clockwise);
@@ -59,6 +62,130 @@ int main(){
 	printf("\n");
 	checkCube(cube);
 
+	solveCube(cube);
+
+	// printCube(cube);
+	// printf("MOVE: rotate_cube(cube,YELLOW,Clockwise)\n");
+	// rotate_cube(cube,   YELLOW,   Clockwise);
+	// printCube(cube);
+	// printf("MOVE: rotate_cube(cube,YELLOW,Clockwise)\n");
+	// rotate_cube(cube,   GREEN,   !Clockwise);
+	// printCube(cube);
+	// printf("MOVE: rotate_cube(cube,YELLOW,Clockwise)\n");
+	// rotate_cube(cube,   RED,   Clockwise);
+	// printCube(cube);
+	// printf("MOVE: rotate_cube(cube,YELLOW,Clockwise)\n");
+	// rotate_cube(cube,   BLUE,   Clockwise);
+	// printCube(cube);
+
+	// printCube(cube);
+	// printf("MOVE: rotate_cube(cube,ORANGE,!Clockwise)\n");
+	// rotate_cube(cube,   ORANGE,   !Clockwise);
+	// printCube(cube);
+	// printf("MOVE: rotate_cube(cube,GREEN,Clockwise)\n");
+	// rotate_cube(cube,   GREEN,   Clockwise);
+	// printCube(cube);
+	// printf("MOVE: rotate_cube(cube,YELLOW,!Clockwise)\n");
+	// rotate_cube(cube,   YELLOW,   !Clockwise);
+	// printCube(cube);
+	// printf("MOVE: rotate_cube(cube,RED,Clockwise)\n");
+	// rotate_cube(cube,   RED,   Clockwise);
+	// printCube(cube);
+	// printf("MOVE: rotate_cube(cube,ORANGE,!Clockwise)\n");
+	// rotate_cube(cube,   ORANGE,   !Clockwise);
+	// printCube(cube);
+}
+
+
+void solveCube(char **cube){
+	int start, move;
+	int nopts[N+2]; //array of top of stacks
+	int option[N+2][N+2]; //array of stacks of options
+	int i, candidate;
+
+
+	move = start = 0; 
+	nopts[start]= 1;
+	while (nopts[start] >0){//while dummy stack is not empty
+		if(nopts[move]>0){ 
+			move++;
+			nopts[move]=0; //initialize new move
+			if(move == 1){
+				for(candidate = N; candidate >=1; candidate --) {
+					nopts[move]++;
+					option[move][nopts[move]] = candidate;
+				}
+			}
+			else{
+				//consider N down to 1 as valid candidates
+				for(candidate=N;candidate>=1;candidate--){
+					if(candidate > option[move-1][nopts[move-1]]) 
+						option[move][++nopts[move]] = candidate;
+				}
+			}
+		}
+		else {
+			for(i=1;i<move;i++){
+				char **temp = cube;
+				switch(option[i][nopts[i]]){
+					case 1:
+						printf("MOVE: rotate_cube(cube,WHITE,Clockwise)\n");
+						rotate_cube(temp,   WHITE,   Clockwise);
+						break;
+					case 2:
+						printf("MOVE: rotate_cube(cube,WHITE,!Clockwise)\n");
+						rotate_cube(temp,   WHITE,   !Clockwise);
+						break;
+					case 3:
+						printf("MOVE: rotate_cube(cube,RED,Clockwise)\n");
+						rotate_cube(temp,   RED,   Clockwise);
+						break;
+					case 4:
+						printf("MOVE: rotate_cube(cube,RED,!Clockwise)\n");
+						rotate_cube(temp,   RED,   !Clockwise);
+						break;
+					case 5:
+						printf("MOVE: rotate_cube(cube,BLUE,Clockwise)\n");
+						rotate_cube(temp,   BLUE,   Clockwise);
+						break;
+					case 6:
+						printf("MOVE: rotate_cube(cube,BLUE,!Clockwise)\n");
+						rotate_cube(temp,   BLUE,   !Clockwise);
+						break;
+					case 7:
+						printf("MOVE: rotate_cube(cube,ORANGE,Clockwise)\n");
+						rotate_cube(temp,   ORANGE,   Clockwise);
+						break;
+					case 8:
+						printf("MOVE: rotate_cube(cube,ORANGE,!Clockwise)\n");
+						rotate_cube(temp,   ORANGE,   !Clockwise);
+						break;
+					case 9:
+						printf("MOVE: rotate_cube(cube,GREEN,Clockwise)\n");
+						rotate_cube(temp,   GREEN,   Clockwise);
+						break;
+					case 10:
+						printf("MOVE: rotate_cube(cube,GREEN,!Clockwise)\n");
+						rotate_cube(temp,   GREEN,   !Clockwise);
+						break;
+					case 11:
+						printf("MOVE: rotate_cube(cube,YELLOW,Clockwise)\n");
+						rotate_cube(temp,   YELLOW,   Clockwise);
+						break;
+					case 12:
+						printf("MOVE: rotate_cube(cube,YELLOW,!Clockwise)\n");
+						rotate_cube(temp,   YELLOW,   !Clockwise);
+						break;
+				}
+				printCube(temp);
+				// printf("%2i",option[i][nopts[i]]);
+			}
+			return;
+			printf("\n");
+			move--;
+			nopts[move]--;
+		}
+	}
 }
 
 void printCube(char **cube){
