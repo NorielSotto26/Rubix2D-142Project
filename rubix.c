@@ -16,6 +16,7 @@
 
 
 void printCube(char **cube);
+bool checkCube(char **cube);
 void rotate_cube(char **cube,int move,bool clockwise);
 void solveCube(char **cube);
 
@@ -28,8 +29,8 @@ int main(){
 		cube[i] = (char*)malloc(NSquares*sizeof(char));
 
 	// fp = fopen("input/3x3.txt","r");
-	fp = fopen("input/3x3-reverse.txt","r");
 	// fp = fopen("input/3x3-reverse.txt","r");
+	fp = fopen("input/WC-RC.txt","r");
 	// fp = fopen("input/4x4.txt","r");
 	// fp = fopen("input/5x5.txt","r");
 
@@ -77,30 +78,112 @@ int main(){
 }
 
 
+bool checkCube(char **cube){
+	int i,j,k,equal=0; 		//1 yung value ng equal pag not equal
+	char temp;
+
+	for(i=0;i!=NFaces;i++){
+		for(j=0;j!=NSquares;j=j+NSides)
+			switch(i){
+				case 0: temp = cube[i][j];
+						for(k=0;k!=NSides;k++){
+							if (cube[i][j+k] != temp){
+								equal = 1;
+								return false;
+							}
+						}
+						break;
+				case 1:	temp = cube[i][j];
+						for(k=0;k!=NSides;k++){
+							if (cube[i][j+k] != temp){
+								equal = 1;
+								return false;
+							}
+						}
+						temp = cube[i+1][j];
+						for(k=0;k!=NSides;k++) {
+							if (cube[i+1][j+k] != temp){
+								equal = 1;
+								return false;
+							}
+						}
+
+						temp = cube[i+2][j];
+						for(k=0;k!=NSides;k++) {
+							if (cube[i+2][j+k] != temp){
+								equal = 1;
+								return false;
+							}
+						}
+
+						temp = cube[i+3][j];
+						for(k=0;k!=NSides;k++) {
+							if (cube[i+3][j+k] != temp){
+								equal = 1;
+								return false;
+							}
+						}
+						break;
+				case 5: temp = cube[i][j];
+				        for(k=0;k!=NSides;k++) {
+				        	if (cube[i][j+k] != temp){
+				        		equal = 1;
+								return false;
+							}	
+				        }
+				        break;
+				default:break;
+			}
+	}
+	
+	return true;
+	//printf("equal?? %i \n\n", equal);
+}
+
 void solveCube(char **cube){
+	int maxMoves = 10;  //Moves limit
+	int posMoves = 12;	//Possible moves in a rubix cube. rotate(color, clockwise or !clockwise)
+	int limit = 3;		//Number of rotations to go full circle - 1
+
 	int start, move;
-	int nopts[N+2]; //array of top of stacks
-	int option[N+2][N+2]; //array of stacks of options
-	int i, candidate;
+	int nopts[maxMoves+2];
+	int option[maxMoves+2][posMoves+2];
+	/*
+		nopts points to the value to use in a stack
+				
+		nopts[i]
+					1	N	N	...
+				i =	0	1	2	...	maxMoves+2
+	
+		option[][]
+		posMoves+2	1	1
+			.		.	.
+			.		.	.
+			2		N-1	N-1
+			1		N	N	...	0
+			0	
+				0	1	2	...	maxMoves+2
+	
+	
+	*/
+	int i, candidate, counter;
+	// counter counts number of the same moves occuring in a row
 
+	if(checkCube(cube)){
+		printf("DONE\n");
+		return;
+	}
 
-	move = start = 0; 
+	move = start = counter = 0; 
 	nopts[start]= 1;
 	while (nopts[start] >0){//while dummy stack is not empty
 		if(nopts[move]>0){ 
 			move++;
 			nopts[move]=0; //initialize new move
-			if(move == 1){
-				for(candidate = N; candidate >=1; candidate --) {
+			if(move < maxMoves+1){		//limits the number of moves to the maximum number of allowed moves
+				for(candidate = posMoves; candidate >=1; candidate --) {
 					nopts[move]++;
 					option[move][nopts[move]] = candidate;
-				}
-			}
-			else{
-				//consider N down to 1 as valid candidates
-				for(candidate=N;candidate>=1;candidate--){
-					if(candidate > option[move-1][nopts[move-1]]) 
-						option[move][++nopts[move]] = candidate;
 				}
 			}
 		}
@@ -158,12 +241,24 @@ void solveCube(char **cube){
 						break;
 				}
 				printCube(temp);
-				// printf("%2i",option[i][nopts[i]]);
 			}
-			return;
 			printf("\n");
+			if(checkCube(cube)){
+				printf("DONE\n");
+				return;
+			}
 			move--;
 			nopts[move]--;
+		}
+			
+		//Increments counter when a value is equal to the one before it, in the combination
+		if(move > 1 && option[move][nopts[move]] == option[move-1][nopts[move-1]]) counter++;
+		else counter = 0;	//resets when two different values are in a row
+		
+		//changes the move to be used whenever the limit is reached or two opposing moves are in a row
+		while(counter == limit || (move > 1 && option[move][nopts[move]] % 2 == 0 && option[move-1][nopts[move-1]] + 1 == option[move][nopts[move]])){
+			nopts[move]--;
+			counter = 0;
 		}
 	}
 }
