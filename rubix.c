@@ -15,6 +15,7 @@
 
 
 void printCube(char **cube);
+void checkCube(char **cube);
 void rotate_cube(char **cube,int move,bool clockwise);
 
 int main(){
@@ -24,9 +25,9 @@ int main(){
 								//malloc, initialize space
 	cube  = (char**)malloc(NFaces*sizeof(char*));	
 	for(i=0;i<NSquares;i++)
-		cube[i] = (char*)malloc(NSquares*sizeof(char));
+	cube[i] = (char*)malloc(NSquares*sizeof(char));
 
-	fp = fopen("input/3x3.txt","r");
+  	fp = fopen("input/3x3.txt","r");
 	// fp = fopen("input/4x4.txt","r");
 	// fp = fopen("input/5x5.txt","r");
 
@@ -55,6 +56,9 @@ int main(){
 	printf("MOVE: rotate_cube(cube,ORANGE,!Clockwise)\n");
 	rotate_cube(cube,   ORANGE,   !Clockwise);
 	printCube(cube);
+	printf("\n");
+	checkCube(cube);
+
 }
 
 void printCube(char **cube){
@@ -85,6 +89,66 @@ void printCube(char **cube){
 
 			}
 	}
+}
+
+void checkCube(char **cube){
+	int i,j,k,equal=0;
+	char temp;
+
+	for(i=0;i!=NFaces;i++){
+		for(j=0;j!=NSquares;j=j+NSides)
+			switch(i){
+				case 0: temp = cube[i][j];
+						for(k=0;k!=NSides;k++){
+							if (cube[i][j+k] != temp){
+								equal = 1;
+								break;
+							}
+						}
+						break;
+				case 1:	temp = cube[i][j];
+						for(k=0;k!=NSides;k++){
+							if (cube[i][j+k] != temp){
+								equal = 1;
+								break;
+							}
+						}
+						temp = cube[i+1][j];
+						for(k=0;k!=NSides;k++) {
+							if (cube[i+1][j+k] != temp){
+								equal = 1;
+								break;
+							}
+						}
+
+						temp = cube[i+2][j];
+						for(k=0;k!=NSides;k++) {
+							if (cube[i+2][j+k] != temp){
+								equal = 1;
+								break;
+							}
+						}
+
+						temp = cube[i+3][j];
+						for(k=0;k!=NSides;k++) {
+							if (cube[i+3][j+k] != temp){
+								equal = 1;
+								break;
+							}
+						}
+						break;
+				case 5: temp = cube[i][j];
+				        for(k=0;k!=NSides;k++) {
+				        	if (cube[i][j+k] != temp){
+				        		equal = 1;
+								break;
+							}	
+				        }
+				        break;
+				default:break;
+			}
+	}
+	//printf("equal?? %i \n\n", equal);
 }
 
 void rotate_face(char ** cube, int move, bool clockwise){
