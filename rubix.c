@@ -1,8 +1,9 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdbool.h>
-#define NSides 9
+#define NSquares 9
 #define NFaces 6
+#define NSides 3
 #define Clockwise true
 #define WHITE 0
 #define RED 1
@@ -22,26 +23,19 @@ int main(){
 
 								//malloc, initialize space
 	cube  = (char**)malloc(NFaces*sizeof(char*));	
-	for(i=0;i<NSides;i++)
-		cube[i] = (char*)malloc(NSides*sizeof(char));
+	for(i=0;i<NSquares;i++)
+		cube[i] = (char*)malloc(NSquares*sizeof(char));
 
-	fp = fopen("input.txt","r");
-	char a,b,c;
+	fp = fopen("3x3.txt","r");
+	// fp = fopen("4x4.txt","r");
+	// fp = fopen("5x5.txt","r");
 
 	i=0;
 	while(!feof(fp)){
-		fscanf(fp, "%c%c%c\n",&a,&b,&c);
-		cube[i][0] = a;
-		cube[i][1] = b;
-		cube[i][2] = c;
-		fscanf(fp, "%c%c%c\n",&a,&b,&c);
-		cube[i][3] = a;
-		cube[i][4] = b;
-		cube[i][5] = c;
-		fscanf(fp, "%c%c%c\n",&a,&b,&c);
-		cube[i][6] = a;
-		cube[i][7] = b;
-		cube[i][8] = c;
+		for (j=0;j!=NSquares;j++){
+			if((j+1)%NSides!=0) fscanf(fp, "%c",&cube[i][j]);
+			else fscanf(fp, "%c\n",&cube[i][j]);
+		}
 		i++;
 	}
 
@@ -64,22 +58,27 @@ int main(){
 }
 
 void printCube(char **cube){
-	int i,j;
+	int i,j,k;
 
 	for(i=0;i!=NFaces;i++){
-		for(j=0;j!=NSides;j=j+3)
+		for(j=0;j!=NSquares;j=j+NSides)
 			switch(i){
 				case 0:
-					printf("      %c %c %c\n", cube[i][j],cube[i][j+1],cube[i][j+2]);
+					for(k=0;k!=NSides;k++) printf("  ");
+					for(k=0;k!=NSides;k++) printf("%c ", cube[i][j+k]);
+					printf("\n");
 					break;
 				case 1:
-					printf("%c %c %c ", cube[i][j],cube[i][j+1],cube[i][j+2]);
-					printf("%c %c %c ", cube[i+1][j],cube[i+1][j+1],cube[i+1][j+2]);
-					printf("%c %c %c ", cube[i+2][j],cube[i+2][j+1],cube[i+2][j+2]);
-					printf("%c %c %c\n", cube[i+3][j],cube[i+3][j+1],cube[i+3][j+2]);
+					for(k=0;k!=NSides;k++) printf("%c ", cube[i][j+k]);
+					for(k=0;k!=NSides;k++) printf("%c ", cube[i+1][j+k]);
+					for(k=0;k!=NSides;k++) printf("%c ", cube[i+2][j+k]);
+					for(k=0;k!=NSides;k++) printf("%c ", cube[i+3][j+k]);
+					printf("\n");
 					break;
 				case 5:
-					printf("      %c %c %c\n", cube[i][j],cube[i][j+1],cube[i][j+2]);
+					for(k=0;k!=NSides;k++) printf("  ");
+					for(k=0;k!=NSides;k++) printf("%c ", cube[i][j+k]);
+					printf("\n");
 					break;
 				default:
 					break;
@@ -89,29 +88,33 @@ void printCube(char **cube){
 }
 
 void rotate_face(char ** cube, int move, bool clockwise){
-	int temp;
+	int temp,i;
 	if(clockwise){
 		temp=cube[move][0];
-		cube[move][0]=cube[move][6];
-		cube[move][6]=cube[move][8];
-		cube[move][8]=cube[move][2];
-		cube[move][2]=temp;
-		temp=cube[move][7];
-		cube[move][7]=cube[move][5];
-		cube[move][5]=cube[move][1];
-		cube[move][1]=cube[move][3];
-		cube[move][3]=temp;
+		cube[move][0] = cube[move][NSquares-NSides];
+		cube[move][NSquares-NSides] = cube[move][NSides*NSides-1];
+		cube[move][NSides*NSides-1] = cube[move][NSides-1];
+		cube[move][NSides-1] = temp;
+		for(i=0;i<NSides-2;i++){
+			temp=cube[move][NSides*NSides-2-i];
+			cube[move][NSides*NSides-2-i] = cube[move][2*NSides-1+(NSides*i)];
+			cube[move][2*NSides-1+(4*i)] = cube[move][1+i];
+			cube[move][1+i] = cube[move][NSides*(NSides-1)-(NSides*(i+1))];
+			cube[move][NSides*(NSides-1)-(NSides*(i+1))] = temp;
+		}
 	}else{
 		temp=cube[move][0];
-		cube[move][0]=cube[move][2];
-		cube[move][2]=cube[move][8];
-		cube[move][8]=cube[move][6];
-		cube[move][6]=temp;
-		temp=cube[move][7];
-		cube[move][7]=cube[move][3];
-		cube[move][3]=cube[move][1];
-		cube[move][1]=cube[move][5];
-		cube[move][5]=temp;
+		cube[move][0]=cube[move][NSides-1];
+		cube[move][NSides-1]=cube[move][NSides*NSides-1];
+		cube[move][NSides*NSides-1]=cube[move][NSides*(NSides-1)];
+		cube[move][NSides*(NSides-1)]=temp;
+		for(i=0;i<NSides-2;i++){
+			temp = cube[move][NSides*NSides-2-i];
+			cube[move][NSides*NSides-2-i] = cube[move][NSides*(NSides-1)-(NSides*(i+1))];
+			cube[move][NSides*(NSides-1)-(NSides*(i+1))] = cube[move][1+i];
+			cube[move][1+i] = cube[move][2*NSides-1+(4*i)];
+			cube[move][2*NSides-1+(4*i)] = temp;
+		}
 
 	}
 }
@@ -123,92 +126,92 @@ void rotate_cube(char **cube,int move,bool clockwise){
 	switch(move){
 		case 0:
 			if(clockwise){
-				for(i = 0; i < 3; i++)	temp[i]=cube[1][i];
-				for(i = 0; i < 3; i++)	cube[1][i]=cube[2][i];
-				for(i = 0; i < 3; i++)	cube[2][i]=cube[3][i];
-				for(i = 0; i < 3; i++)	cube[3][i]=cube[4][i];
-				for(i = 0; i < 3; i++)	cube[4][i]=temp[i];
+				for(i = 0; i < NSides; i++)	temp[i]=cube[1][i];
+				for(i = 0; i < NSides; i++)	cube[1][i]=cube[2][i];
+				for(i = 0; i < NSides; i++)	cube[2][i]=cube[3][i];
+				for(i = 0; i < NSides; i++)	cube[3][i]=cube[4][i];
+				for(i = 0; i < NSides; i++)	cube[4][i]=temp[i];
 			}else{
-				for(i = 0; i < 3; i++)	temp[i]=cube[1][i];
-				for(i = 0; i < 3; i++)	cube[1][i]=cube[4][i];
-				for(i = 0; i < 3; i++)	cube[4][i]=cube[3][i];
-				for(i = 0; i < 3; i++)	cube[3][i]=cube[2][i];
-				for(i = 0; i < 3; i++)	cube[2][i]=temp[i];
+				for(i = 0; i < NSides; i++)	temp[i]=cube[1][i];
+				for(i = 0; i < NSides; i++)	cube[1][i]=cube[4][i];
+				for(i = 0; i < NSides; i++)	cube[4][i]=cube[3][i];
+				for(i = 0; i < NSides; i++)	cube[3][i]=cube[2][i];
+				for(i = 0; i < NSides; i++)	cube[2][i]=temp[i];
 			}
 			break;
 		case 1:
 			if(clockwise){
-				for(i = 0; i < 3; i++)	temp[i]=cube[0][i*3];
-				for(i = 0, j = 2; i < 3; i++, j--)	cube[0][i*3]=cube[4][j*3+2];
-				for(i = 0, j = 2; i < 3; i++, j--)	cube[4][j*3+2]=cube[5][i*3];
-				for(i = 0; i < 3; i++)	cube[5][i*3]=cube[2][i*3];
-				for(i = 0; i < 3; i++)	cube[2][i*3]=temp[i];
+				for(i = 0; i < NSides; i++)	temp[i]=cube[0][i*NSides];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	cube[0][i*NSides]=cube[4][j*NSides+(NSides-1)];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	cube[4][j*NSides+(NSides-1)]=cube[5][i*NSides];
+				for(i = 0; i < NSides; i++)	cube[5][i*NSides]=cube[2][i*NSides];
+				for(i = 0; i < NSides; i++)	cube[2][i*NSides]=temp[i];
 			}else{
-				for(i = 0, j = 2; i < 3; i++, j--)	temp[i]=cube[0][j*3];
-				for(i = 0; i < 3; i++)	cube[0][i*3]=cube[2][i*3];
-				for(i = 0, j = 2; i < 3; i++, j--)	cube[2][i*3]=cube[5][j*3];
-				for(i = 0, j = 2; i < 3; i++, j--)	cube[5][j*3]=cube[4][i*3+2];
-				for(i = 0; i < 3; i++)	cube[4][i*3+2]=temp[i];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	temp[i]=cube[0][j*NSides];
+				for(i = 0; i < NSides; i++)	cube[0][i*NSides]=cube[2][i*NSides];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	cube[2][i*NSides]=cube[5][j*NSides];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	cube[5][j*NSides]=cube[4][i*NSides+NSides-1];
+				for(i = 0; i < NSides; i++)	cube[4][i*NSides+NSides-1]=temp[i];
 			}
 			break;
 		case 2:
 			if(clockwise){
-				for(i = 0; i < 3; i++)	temp[i]=cube[0][i+6];
-				for(i = 0, j = 2; i < 3; i++, j--)	cube[0][i+6]=cube[1][j*3+2];
-				for(i = 0; i < 3; i++)	cube[1][i*3+2]=cube[5][i];
-				for(i = 0, j = 2; i < 3; i++, j--)	cube[5][i]=cube[3][j*3];
-				for(i = 0; i < 3; i++)	cube[3][i*3]=temp[i];
+				for(i = 0; i < NSides; i++)	temp[i]=cube[0][i+(NSquares-NSides)];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	cube[0][i+(NSquares-NSides)]=cube[1][j*NSides+(NSides-1)];
+				for(i = 0; i < NSides; i++)	cube[1][i*NSides+NSides-1]=cube[5][i];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	cube[5][i]=cube[3][j*NSides];
+				for(i = 0; i < NSides; i++)	cube[3][i*NSides]=temp[i];
 			}else{
-				for(i = 0, j = 2; i < 3; i++, j--)	temp[i]=cube[0][j+6];
-				for(i = 0; i < 3; i++)	cube[0][i+6]=cube[3][i*3];
-				for(i = 0, j = 2; i < 3; i++, j--)	cube[3][i*3]=cube[5][j];
-				for(i = 0; i < 3; i++)	cube[5][i]=cube[1][i*3+2];
-				for(i = 0; i < 3; i++)	cube[1][i*3+2]=temp[i];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	temp[i]=cube[0][j+(NSquares-NSides)];
+				for(i = 0; i < NSides; i++)	cube[0][i+(NSquares-NSides)]=cube[3][i*NSides];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	cube[3][i*NSides]=cube[5][j];
+				for(i = 0; i < NSides; i++)	cube[5][i]=cube[1][i*NSides+NSides-1];
+				for(i = 0; i < NSides; i++)	cube[1][i*NSides+NSides-1]=temp[i];
 			}
 			break;
 		case 3:
 			if(clockwise){
-				for(i = 0, j = 2; i < 3; i++, j--)	temp[i]=cube[0][j*3+2];
-				for(i = 0; i < 3; i++)	cube[0][i*3+2]=cube[2][i*3+2];
-				for(i = 0; i < 3; i++)	cube[2][i*3+2]=cube[5][i*3+2];
-				for(i = 0, j = 2; i < 3; i++, j--)	cube[5][i*3+2]=cube[4][j*3];
-				for(i = 0; i < 3; i++)	cube[4][i*3]=temp[i];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	temp[i]=cube[0][j*NSides+(NSides-1)];
+				for(i = 0; i < NSides; i++)	cube[0][i*NSides+NSides-1]=cube[2][i*NSides+NSides-1];
+				for(i = 0; i < NSides; i++)	cube[2][i*NSides+NSides-1]=cube[5][i*NSides+NSides-1];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	cube[5][i*NSides+NSides-1]=cube[4][j*NSides];
+				for(i = 0; i < NSides; i++)	cube[4][i*NSides]=temp[i];
 			}else{
-				for(i = 0; i < 3; i++)	temp[i]=cube[0][i*3+2];
-				for(i = 0, j = 2; i < 3; i++, j--)	cube[0][i*3+2]=cube[4][j*3];
-				for(i = 0, j = 2; i < 3; i++, j--)	cube[4][i*3]=cube[5][j*3+2];
-				for(i = 0; i < 3; i++)	cube[5][i*3+2]=cube[2][i*3+2];
-				for(i = 0; i < 3; i++)	cube[2][i*3+2]=temp[i];
+				for(i = 0; i < NSides; i++)	temp[i]=cube[0][i*NSides+NSides-1];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	cube[0][i*NSides+NSides-1]=cube[4][j*NSides];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	cube[4][i*NSides]=cube[5][j*NSides+(NSides-1)];
+				for(i = 0; i < NSides; i++)	cube[5][i*NSides+NSides-1]=cube[2][i*NSides+NSides-1];
+				for(i = 0; i < NSides; i++)	cube[2][i*NSides+NSides-1]=temp[i];
 			}
 			break;
 		case 4:
 			if(clockwise){
-				for(i = 0, j = 2; i < 3; i++, j--)	temp[i]=cube[0][j];
-				for(i = 0; i < 3; i++)	cube[0][i]=cube[3][i*3+2];
-				for(i = 0, j = 2; i < 3; i++, j--)	cube[3][i*3+2]=cube[5][j+6];
-				for(i = 0; i < 3; i++)	cube[5][i+6]=cube[1][i*3];
-				for(i = 0; i < 3; i++)	cube[1][i*3]=temp[i];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	temp[i]=cube[0][j];
+				for(i = 0; i < NSides; i++)	cube[0][i]=cube[3][i*NSides+NSides-1];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	cube[3][i*NSides+NSides-1]=cube[5][j+(NSquares-NSides)];
+				for(i = 0; i < NSides; i++)	cube[5][i+(NSquares-NSides)]=cube[1][i*NSides];
+				for(i = 0; i < NSides; i++)	cube[1][i*NSides]=temp[i];
 			}else{
-				for(i = 0; i < 3; i++)	temp[i]=cube[0][i];
-				for(i = 0, j = 2; i < 3; i++, j--)	cube[0][i]=cube[1][j*3];
-				for(i = 0; i < 3; i++)	cube[1][i*3]=cube[5][i+6];
-				for(i = 0, j = 2; i < 3; i++, j--)	cube[5][i+6]=cube[3][j*3+2];
-				for(i = 0; i < 3; i++)	cube[3][i*3+2]=temp[i];
+				for(i = 0; i < NSides; i++)	temp[i]=cube[0][i];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	cube[0][i]=cube[1][j*NSides];
+				for(i = 0; i < NSides; i++)	cube[1][i*NSides]=cube[5][i+(NSquares-NSides)];
+				for(i = 0, j = NSides-1; i < NSides; i++, j--)	cube[5][i+(NSquares-NSides)]=cube[3][j*NSides+(NSides-1)];
+				for(i = 0; i < NSides; i++)	cube[3][i*NSides+NSides-1]=temp[i];
 			}
 			break;
 		case 5:
 			if(clockwise){
-				for(i = 0; i < 3; i++)	temp[i]=cube[4][i+6];
-				for(i = 0; i < 3; i++)	cube[4][i+6]=cube[3][i+6];
-				for(i = 0; i < 3; i++)	cube[3][i+6]=cube[2][i+6];
-				for(i = 0; i < 3; i++)	cube[2][i+6]=cube[1][i+6];
-				for(i = 0; i < 3; i++)	cube[1][i+6]=temp[i];
+				for(i = 0; i < NSides; i++)	temp[i]=cube[4][i+(NSquares-NSides)];
+				for(i = 0; i < NSides; i++)	cube[4][i+(NSquares-NSides)]=cube[3][i+(NSquares-NSides)];
+				for(i = 0; i < NSides; i++)	cube[3][i+(NSquares-NSides)]=cube[2][i+(NSquares-NSides)];
+				for(i = 0; i < NSides; i++)	cube[2][i+(NSquares-NSides)]=cube[1][i+(NSquares-NSides)];
+				for(i = 0; i < NSides; i++)	cube[1][i+(NSquares-NSides)]=temp[i];
 			}else{
-				for(i = 0; i < 3; i++)	temp[i]=cube[4][i+6];
-				for(i = 0; i < 3; i++)	cube[4][i+6]=cube[1][i+6];
-				for(i = 0; i < 3; i++)	cube[1][i+6]=cube[2][i+6];
-				for(i = 0; i < 3; i++)	cube[2][i+6]=cube[3][i+6];
-				for(i = 0; i < 3; i++)	cube[3][i+6]=temp[i];
+				for(i = 0; i < NSides; i++)	temp[i]=cube[4][i+(NSquares-NSides)];
+				for(i = 0; i < NSides; i++)	cube[4][i+(NSquares-NSides)]=cube[1][i+(NSquares-NSides)];
+				for(i = 0; i < NSides; i++)	cube[1][i+(NSquares-NSides)]=cube[2][i+(NSquares-NSides)];
+				for(i = 0; i < NSides; i++)	cube[2][i+(NSquares-NSides)]=cube[3][i+(NSquares-NSides)];
+				for(i = 0; i < NSides; i++)	cube[3][i+(NSquares-NSides)]=temp[i];
 			}
 			break;
 		default:
