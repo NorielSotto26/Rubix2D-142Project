@@ -26,9 +26,9 @@ int main(){
 	for(i=0;i<NSquares;i++)
 		cube[i] = (char*)malloc(NSquares*sizeof(char));
 
-	fp = fopen("3x3.txt","r");
-	// fp = fopen("4x4.txt","r");
-	// fp = fopen("5x5.txt","r");
+	fp = fopen("input/3x3.txt","r");
+	// fp = fopen("input/4x4.txt","r");
+	// fp = fopen("input/5x5.txt","r");
 
 	i=0;
 	while(!feof(fp)){
