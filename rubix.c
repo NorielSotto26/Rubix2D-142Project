@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 #include<stdbool.h>
 #define NSquares 9
 #define NFaces 6
@@ -25,12 +26,14 @@ int main(){
 	char **cube,i=0,j;
 
 	cube  = (char**)malloc(NFaces*sizeof(char*));	
-	for(i=0;i<NSquares;i++)
+	for(i=0;i<NFaces;i++)
 		cube[i] = (char*)malloc(NSquares*sizeof(char));
 
-	// fp = fopen("input/3x3.txt","r");
+	fp = fopen("input/3x3.txt","r");
 	// fp = fopen("input/3x3-reverse.txt","r");
-	fp = fopen("input/WC-RC.txt","r");
+	// fp = fopen("input/sample.txt","r");
+	// fp = fopen("input/sample-4x4.txt","r");
+	// fp = fopen("input/WC-RC.txt","r");
 	// fp = fopen("input/4x4.txt","r");
 	// fp = fopen("input/5x5.txt","r");
 
@@ -43,14 +46,15 @@ int main(){
 		i++;
 	}
 
+	printf("Solving...\n");
 	solveCube(cube);
 
 	// printCube(cube);
 	// printf("MOVE: rotate_cube(cube,YELLOW,Clockwise)\n");
-	// rotate_cube(cube,   YELLOW,   Clockwise);
+	// rotate_cube(cube,   RED,   !Clockwise);
 	// printCube(cube);
 	// printf("MOVE: rotate_cube(cube,YELLOW,Clockwise)\n");
-	// rotate_cube(cube,   GREEN,   !Clockwise);
+	// rotate_cube(cube,   WHITE,   !Clockwise);
 	// printCube(cube);
 	// printf("MOVE: rotate_cube(cube,YELLOW,Clockwise)\n");
 	// rotate_cube(cube,   RED,   Clockwise);
@@ -141,7 +145,7 @@ bool checkCube(char **cube){
 }
 
 void solveCube(char **cube){
-	int maxMoves = 10;  //Moves limit
+	int maxMoves = 5;  //Moves limit
 	int posMoves = 12;	//Possible moves in a rubix cube. rotate(color, clockwise or !clockwise)
 	int limit = 3;		//Number of rotations to go full circle - 1
 
@@ -166,8 +170,16 @@ void solveCube(char **cube){
 	
 	
 	*/
-	int i, candidate, counter;
+	int i, j, k, l, candidate, counter;
 	// counter counts number of the same moves occuring in a row
+
+	int maxAnswers=1000, totalAnswers=0;	//max solutions to show //total answers in the array
+	int solutions[maxAnswers][maxMoves];	//array storing solutions
+
+	//initializes array to 0
+	for(i=0;i!=maxAnswers;i++)
+		for(j=0;j!=maxMoves;j++)
+			solutions[i][j]=0;
 
 	if(checkCube(cube)){
 		printf("DONE\n");
@@ -188,66 +200,132 @@ void solveCube(char **cube){
 			}
 		}
 		else {
-			for(i=1;i<move;i++){
-				char **temp = cube;
+			char **temp;
+			char moves[1000] = "";
+
+			temp  = (char**)malloc(NFaces*sizeof(char*));	
+			for(i=0;i<NFaces;i++){
+				temp[i] = (char*)malloc(NSquares*sizeof(char));
+				for(j=0;j<NSquares;j++){
+					temp[i][j]=cube[i][j];
+				}
+			}
+			// printf("===================\n");
+			// printCube(temp);
+
+			for(i=1,j=0;i<move;i++,j++){
+				solutions[totalAnswers][j] = nopts[i];
+				// printf("%d\n", option[i][nopts[i]]);
+
+				// printf("i:%d nopts[i]:%d\n", i,nopts[i]);
 				switch(option[i][nopts[i]]){
 					case 1:
-						printf("MOVE: rotate_cube(cube,WHITE,Clockwise)\n");
+						strcat(moves,"MOVE: rotate_cube(cube,WHITE,Clockwise)\n");
+						// printf("MOVE: rotate_cube(cube,WHITE,Clockwise)\n");
 						rotate_cube(temp,   WHITE,   Clockwise);
 						break;
 					case 2:
-						printf("MOVE: rotate_cube(cube,WHITE,!Clockwise)\n");
+						strcat(moves,"MOVE: rotate_cube(cube,WHITE,!Clockwise)\n");
+						// printf("MOVE: rotate_cube(cube,WHITE,!Clockwise)\n");
 						rotate_cube(temp,   WHITE,   !Clockwise);
 						break;
 					case 3:
-						printf("MOVE: rotate_cube(cube,RED,Clockwise)\n");
+						strcat(moves,"MOVE: rotate_cube(cube,RED,Clockwise)\n");
+						// printf("MOVE: rotate_cube(cube,RED,Clockwise)\n");
 						rotate_cube(temp,   RED,   Clockwise);
 						break;
 					case 4:
-						printf("MOVE: rotate_cube(cube,RED,!Clockwise)\n");
+						strcat(moves,"MOVE: rotate_cube(cube,RED,!Clockwise)\n");
+						// printf("MOVE: rotate_cube(cube,RED,!Clockwise)\n");
 						rotate_cube(temp,   RED,   !Clockwise);
 						break;
 					case 5:
-						printf("MOVE: rotate_cube(cube,BLUE,Clockwise)\n");
+						strcat(moves,"MOVE: rotate_cube(cube,BLUE,Clockwise)\n");
+						// printf("MOVE: rotate_cube(cube,BLUE,Clockwise)\n");
 						rotate_cube(temp,   BLUE,   Clockwise);
 						break;
 					case 6:
-						printf("MOVE: rotate_cube(cube,BLUE,!Clockwise)\n");
+						strcat(moves,"MOVE: rotate_cube(cube,BLUE,!Clockwise)\n");
+						// printf("MOVE: rotate_cube(cube,BLUE,!Clockwise)\n");
 						rotate_cube(temp,   BLUE,   !Clockwise);
 						break;
 					case 7:
-						printf("MOVE: rotate_cube(cube,ORANGE,Clockwise)\n");
+						strcat(moves,"MOVE: rotate_cube(cube,ORANGE,Clockwise)\n");
+						// printf("MOVE: rotate_cube(cube,ORANGE,Clockwise)\n");
 						rotate_cube(temp,   ORANGE,   Clockwise);
 						break;
 					case 8:
-						printf("MOVE: rotate_cube(cube,ORANGE,!Clockwise)\n");
+						strcat(moves,"MOVE: rotate_cube(cube,ORANGE,!Clockwise)\n");
+						// printf("MOVE: rotate_cube(cube,ORANGE,!Clockwise)\n");
 						rotate_cube(temp,   ORANGE,   !Clockwise);
 						break;
 					case 9:
-						printf("MOVE: rotate_cube(cube,GREEN,Clockwise)\n");
+						strcat(moves,"MOVE: rotate_cube(cube,GREEN,Clockwise)\n");
+						// printf("MOVE: rotate_cube(cube,GREEN,Clockwise)\n");
 						rotate_cube(temp,   GREEN,   Clockwise);
 						break;
 					case 10:
-						printf("MOVE: rotate_cube(cube,GREEN,!Clockwise)\n");
+						strcat(moves,"MOVE: rotate_cube(cube,GREEN,!Clockwise)\n");
+						// printf("MOVE: rotate_cube(cube,GREEN,!Clockwise)\n");
 						rotate_cube(temp,   GREEN,   !Clockwise);
 						break;
 					case 11:
-						printf("MOVE: rotate_cube(cube,YELLOW,Clockwise)\n");
+						strcat(moves,"MOVE: rotate_cube(cube,WHITE,Clockwise)\n");
+						// printf("MOVE: rotate_cube(cube,YELLOW,Clockwise)\n");
 						rotate_cube(temp,   YELLOW,   Clockwise);
 						break;
 					case 12:
-						printf("MOVE: rotate_cube(cube,YELLOW,!Clockwise)\n");
+						strcat(moves,"MOVE: rotate_cube(cube,YELLOW,!Clockwise)\n");
+						// printf("MOVE: rotate_cube(cube,YELLOW,!Clockwise)\n");
 						rotate_cube(temp,   YELLOW,   !Clockwise);
 						break;
 				}
-				printCube(temp);
+				// printCube(temp);
+				if(checkCube(temp)){
+					printCube(temp);
+					bool exist = false;
+					for(k=0;k<totalAnswers;k++){
+						for(l=0;l<j;l++){
+							if(solutions[k][l]!=solutions[totalAnswers][l])	break;
+							else if(l+1==j) exist = true;
+						}
+						if(exist) break;
+					}
+					if(!exist){
+						printf("DONE\n");
+						printf("Solution %d:\n%s",++totalAnswers,moves);
+					}else{
+						nopts[i]--;
+					}
+					break;	
+				}
 			}
-			printf("\n");
-			if(checkCube(cube)){
-				printf("DONE\n");
-				return;
-			}
+			// printf("\n");
+			//resets the row to 0
+			if(!checkCube(temp))
+				for(i=0;i<maxAnswers;i++)
+					for(j=0;j<maxMoves;j++)
+						solutions[i][j]=0;
 			move--;
+			// printf("MOVE%d\n", move);
+			// for(i=0;i<maxMoves+2;i++){
+			// 	for(j=0;j<posMoves+2;j++){
+			// 		if(option[i][j]>12 || option[i][j]<1) printf("0  ");
+			// 		else printf("%d ",option[i][j] );
+			// 	}
+			// 	printf("\n");
+
+			// }
+			// for(j=0;j<maxMoves+2;j++){
+			// 	if(nopts[j]>9 || nopts[j]<1) printf("%d ",nopts[j] );
+			// 	else printf("%d  ",nopts[j] );
+			// }
+			// printf("\n");
+			nopts[move]--;
+		}
+		
+		//Changes move to be used when two opposing moves are in a row
+		while(move > 1 && option[move][nopts[move]] % 2 == 1 && option[move-1][nopts[move-1]] - 1 == option[move][nopts[move]]){
 			nopts[move]--;
 		}
 			
